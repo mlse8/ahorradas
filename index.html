@@ -3,9 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Ahorradas</title>
 </head>
 <body>
-    
+    <nav class="flex justify-between items-center bg-[#00D1B2] lg:py-4 lg:px-8">
+        <div class="py-2 px-3 flex items-center gap-2 text-white">
+            <span class="iconify" data-icon="ph:wallet-fill" data-width="40" data-height="40"></span>
+            <h1 class="font-semibold text-3xl lg:text-4xl">AhorrADAs</h1>
+        </div>
+        <div class="p-4 text-white cursor-pointer hover:bg-[#00C6A9]">
+            <span class="iconify lg:hidden" data-icon="ic:round-menu" data-width="25" data-height="25"></span>
+            <span class="iconify hidden" data-icon="ic:close" data-width="25" data-height="25"></span>
+        </div>
+        <div class="w-full py-2 absolute left-0 translate-y-[6.3rem] bg-white shadow-xl hidden lg:w-fit lg:block lg:static lg:translate-y-0 lg:bg-transparent lg:shadow-none">
+            <ul class="flex flex-col gap-1 lg:flex-row">
+                <li class="py-2 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 hover:text-indigo-700 lg:text-white lg:rounded lg:hover:text-white lg:hover:bg-[#00B89C]">
+                    <span class="iconify" data-icon="akar-icons:statistic-up"></span>
+                    Balance
+                </li>
+                <li class="py-2 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 hover:text-indigo-700 lg:text-white lg:rounded lg:hover:text-white lg:hover:bg-[#00B89C]">
+                    <span class="iconify" data-icon="mdi:tag"></span>
+                    Categorías
+                </li>
+                <li class="py-2 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 hover:text-indigo-700 lg:text-white lg:rounded lg:hover:text-white lg:hover:bg-[#00B89C]">
+                    <span class="iconify" data-icon="foundation:graph-pie" data-width="18" data-height="18"></span>
+                    Reportes
+                </li>
+            </ul>
+        </div>
+    </nav>
 </body>
 </html>
