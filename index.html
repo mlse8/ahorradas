@@ -13,11 +13,11 @@
             <span class="iconify" data-icon="ph:wallet-fill" data-width="40" data-height="40"></span>
             <h1 class="font-semibold text-3xl lg:text-4xl">AhorrADAs</h1>
         </div>
-        <div class="p-4 text-white cursor-pointer hover:bg-[#00C6A9]">
-            <span class="iconify lg:hidden" data-icon="ic:round-menu" data-width="25" data-height="25"></span>
-            <span class="iconify hidden" data-icon="ic:close" data-width="25" data-height="25"></span>
+        <div class="p-4 text-white cursor-pointer hover:bg-[#00C6A9] lg:hidden">
+            <span id="open-menu" class="iconify" data-icon="ic:round-menu" data-width="25" data-height="25"></span>
+            <span id="close-menu" class="iconify hidden" data-icon="ic:close" data-width="25" data-height="25"></span>
         </div>
-        <div class="w-full py-2 absolute left-0 translate-y-[6.3rem] bg-white shadow-xl hidden lg:w-fit lg:block lg:static lg:translate-y-0 lg:bg-transparent lg:shadow-none">
+        <div id="menu" class="w-full py-2 absolute left-0 translate-y-[6.3rem] bg-white shadow-xl hidden lg:w-fit lg:block lg:static lg:translate-y-0 lg:bg-transparent lg:shadow-none">
             <ul class="flex flex-col gap-1 lg:flex-row">
                 <li class="py-2 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 hover:text-indigo-700 lg:text-white lg:rounded lg:hover:text-white lg:hover:bg-[#00B89C]">
                     <span class="iconify" data-icon="akar-icons:statistic-up"></span>
@@ -34,7 +34,7 @@
             </ul>
         </div>
     </nav>
-    <main class="pt-16 pb-12 px-6">
+    <main class="pt-16 pb-12 px-6 lg:translate-y-0">
         <!-- Balance -->
         <section class="max-w-4xl m-auto flex flex-col gap-6 lg:flex-row">
             <div class="flex flex-col gap-6 lg:w-1/3">
@@ -230,5 +230,7 @@
             </div>
         </section>
     </main>
+
+    <script src="./js/main.js"></script>
 </body>
 </html>
