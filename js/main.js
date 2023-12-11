@@ -1,32 +1,48 @@
 const $ = (selector) => document.querySelector(selector)
+const $$ = (selector) => document.querySelectorAll(selector)
 
-const hideElement = (selector) => $(selector).classList.add("hidden")
-const showElement = (selector) => $(selector).classList.remove("hidden")
+const hideElement = (selectors) => {
+    for (const selector of selectors) {
+        $(selector).classList.add("hidden")
+    }
+}
+const showElement = (selectors) => {
+    for (const selector of selectors) {
+        $(selector).classList.remove("hidden")
+    }
+}
 
 // Menu 
 const openMenu = () => {
-    hideElement("#open-menu") 
-    showElement("#close-menu")
-    showElement("#menu")
+    hideElement(["#open-menu"]) 
+    showElement(["#close-menu", "#menu"])
     $("main").classList.add("translate-y-32")
 }
 const closeMenu = () =>{
-    showElement("#open-menu")
-    hideElement("#close-menu") 
-    hideElement("#menu")
+    showElement(["#open-menu"])
+    hideElement(["#close-menu", "#menu"])
     $("main").classList.remove("translate-y-32")
+}
+
+// Items menu 
+const menuItems = () => {
+    $$("#menu li").forEach((menuItem) => {
+        menuItem.addEventListener('click', () => {
+            $$(".section-content").forEach(section => section.classList.add("hidden"))
+            let sectionToShow = menuItem.getAttribute("data-section")
+            $(`#${sectionToShow}-section`).classList.remove("hidden")
+        })
+    })
 }
 
 // Filtros
 const showFilters = () =>{
-    hideElement("#hide-filters")
-    showElement("#show-filters")
-    hideElement("#filters")
+    hideElement(["#hide-filters", "#filters"])
+    showElement(["#show-filters"])
 }
 const hideFilters = () =>{
-    showElement("#hide-filters")
-    hideElement("#show-filters")
-    showElement("#filters")
+    showElement(["#hide-filters", "#filters"])
+    hideElement(["#show-filters"])
 }
 
 const initializeProject = () => {
@@ -34,6 +50,7 @@ const initializeProject = () => {
     $("#close-menu").addEventListener("click", closeMenu)
     $("#hide-filters").addEventListener("click",showFilters)
     $("#show-filters").addEventListener("click",hideFilters)
+    menuItems()
 }
 
 window.addEventListener("load", initializeProject)
