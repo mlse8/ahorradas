@@ -54,6 +54,20 @@ const renderCategoriesOptions = (categories) => {
     }
 }
 
+// Tabla categorias
+const renderCategoriesTable = (categories) => {
+    for (const {name} of categories) {
+        $("#categories-table").innerHTML += `
+            <div class="mb-6 flex justify-between items-center">
+                <p class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${name}</p>
+                <div>
+                    <span class="mr-4 text-xs text-indigo-700 cursor-pointer hover:text-zinc-700">Editar</span>
+                    <span class="text-xs text-indigo-700 cursor-pointer hover:text-zinc-700">Eliminar</span>
+                </div>
+            </div>`
+    }
+}
+
 const initializeProject = () => {
     $("#open-menu").addEventListener("click", openMenu)
     $("#close-menu").addEventListener("click", closeMenu)
@@ -61,7 +75,8 @@ const initializeProject = () => {
     $("#show-filters").addEventListener("click",hideFilters)
     menuItems()
     initialize()
-    renderCategoriesOptions(data.categories)
+    renderCategoriesOptions(allCategories.categories)
+    renderCategoriesTable(allCategories.categories)
 }
 
 window.addEventListener("load", initializeProject)

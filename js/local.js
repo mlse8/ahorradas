@@ -29,6 +29,8 @@ const data = {
     }]
 }
 
+const allCategories = getData("data") || data.categories
+
 const initialize = () => {
-    setData("data", data)
+    setData("data", allCategories)
 }
