@@ -45,12 +45,23 @@ const hideFilters = () =>{
     hideElement(["#show-filters"])
 }
 
+// Filtros categorias
+const renderCategoriesOptions = (categories) => {
+    for (const {id, name} of categories) {
+        $("#categories-options").innerHTML += `
+            <option value="${id}">${name}</option>
+        `
+    }
+}
+
 const initializeProject = () => {
     $("#open-menu").addEventListener("click", openMenu)
     $("#close-menu").addEventListener("click", closeMenu)
     $("#hide-filters").addEventListener("click",showFilters)
     $("#show-filters").addEventListener("click",hideFilters)
     menuItems()
+    initialize()
+    renderCategoriesOptions(data.categories)
 }
 
 window.addEventListener("load", initializeProject)
