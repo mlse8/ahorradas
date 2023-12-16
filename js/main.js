@@ -31,6 +31,7 @@ const menuItems = () => {
             $$(".section-content").forEach(section => section.classList.add("hidden"))
             let sectionToShow = menuItem.getAttribute("data-section")
             $(`#${sectionToShow}-section`).classList.remove("hidden")
+            hideElement(["#edit-category"])
         })
     })
 }
@@ -56,16 +57,28 @@ const renderCategoriesOptions = (categories) => {
 
 // Tabla categorias
 const renderCategoriesTable = (categories) => {
-    for (const {name} of categories) {
+    for (const {id, name} of categories) {
         $("#categories-table").innerHTML += `
             <div class="mb-6 flex justify-between items-center">
                 <p class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${name}</p>
                 <div>
-                    <span class="mr-4 text-xs text-indigo-700 cursor-pointer hover:text-zinc-700">Editar</span>
+                    <span id="edit-btn" class="mr-4 text-xs text-indigo-700 cursor-pointer hover:text-zinc-700" data-id="${id}" onclick="showEditCategory('${id}')">Editar</span>
                     <span class="text-xs text-indigo-700 cursor-pointer hover:text-zinc-700">Eliminar</span>
                 </div>
             </div>`
     }
+}
+
+// Editar categoria
+const showEditCategory = (categoryId) => {
+    showElement(["#edit-category"])
+    $("#categories-description").value = getCategoryNameById(categoryId)
+    hideElement(["#categories-section"])
+}
+
+const getCategoryNameById = (categoryId) => {
+    const categorySelected = allCategories.find(({id}) => id === categoryId)
+    return categorySelected ? categorySelected.name : ''
 }
 
 const initializeProject = () => {
@@ -75,8 +88,8 @@ const initializeProject = () => {
     $("#show-filters").addEventListener("click",hideFilters)
     menuItems()
     initialize()
-    renderCategoriesOptions(allCategories.categories)
-    renderCategoriesTable(allCategories.categories)
+    renderCategoriesOptions(allCategories)
+    renderCategoriesTable(allCategories)
 }
 
 window.addEventListener("load", initializeProject)
