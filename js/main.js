@@ -62,14 +62,24 @@ const renderCategoriesTable = (categories) => {
             <div class="mb-6 flex justify-between items-center">
                 <p class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${name}</p>
                 <div>
-                    <span id="edit-btn" class="mr-4 text-xs text-indigo-700 cursor-pointer hover:text-zinc-700" data-id="${id}" onclick="showEditCategory('${id}')">Editar</span>
+                    <span class="edit-btn mr-4 text-xs text-indigo-700 cursor-pointer hover:text-zinc-700" data-id="${id}">Editar</span>
                     <span class="text-xs text-indigo-700 cursor-pointer hover:text-zinc-700">Eliminar</span>
                 </div>
             </div>`
     }
+    editButton()
 }
 
 // Editar categoria
+const editButton = () => {
+    $$(".edit-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            const categoryId = button.getAttribute("data-id")
+            showEditCategory(categoryId)
+        })
+    })
+}
+
 const showEditCategory = (categoryId) => {
     showElement(["#edit-category"])
     $("#categories-description").value = getCategoryNameById(categoryId)
@@ -82,12 +92,13 @@ const getCategoryNameById = (categoryId) => {
 }
 
 const initializeProject = () => {
+    initialize()
     $("#open-menu").addEventListener("click", openMenu)
     $("#close-menu").addEventListener("click", closeMenu)
     $("#hide-filters").addEventListener("click",showFilters)
     $("#show-filters").addEventListener("click",hideFilters)
     menuItems()
-    initialize()
+    editButton()
     renderCategoriesOptions(allCategories)
     renderCategoriesTable(allCategories)
 }
