@@ -6,10 +6,18 @@ const hideElement = (selectors) => {
         $(selector).classList.add("hidden")
     }
 }
+
 const showElement = (selectors) => {
     for (const selector of selectors) {
         $(selector).classList.remove("hidden")
     }
+}
+
+const cleanContainer = (selector) => $(selector).innerHTML = ""
+
+const getCategoryNameById = (categoryId) => {
+    const categorySelected = getCategories().find(({id}) => id === categoryId)
+    return categorySelected ? categorySelected.name : 'nada'
 }
 
 // Menu 
@@ -23,7 +31,6 @@ const closeMenu = () =>{
     hideElement(["#close-menu", "#menu"])
     $("main").classList.remove("translate-y-32")
 }
-
 // Items menu 
 const menuItems = () => {
     $$("#menu li").forEach((menuItem) => {
@@ -46,17 +53,35 @@ const hideFilters = () =>{
     hideElement(["#show-filters"])
 }
 
-// Filtros categorias
+// CATEGORIAS 
+// Editar
+const showEditCategory = (categoryId) => {
+    showElement(["#edit-category"])
+    $("#categories-description").value = getCategoryNameById(categoryId)
+    $("#edit-category-button").setAttribute("data-id", categoryId)
+    hideElement(["#categories-section"])
+}
+const editButton = () => {
+    $$(".edit-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            const categoryId = button.getAttribute("data-id")
+            showEditCategory(categoryId)
+        })
+    })
+}
+// Filtros
 const renderCategoriesOptions = (categories) => {
+    cleanContainer("#categories-options")
+    $("#categories-options").innerHTML = `<option value="">Todas</option>`
     for (const {id, name} of categories) {
         $("#categories-options").innerHTML += `
             <option value="${id}">${name}</option>
         `
     }
 }
-
-// Tabla categorias
+// Tabla
 const renderCategoriesTable = (categories) => {
+    cleanContainer("#categories-table")
     for (const {id, name} of categories) {
         $("#categories-table").innerHTML += `
             <div class="mb-6 flex justify-between items-center">
@@ -69,27 +94,29 @@ const renderCategoriesTable = (categories) => {
     }
     editButton()
 }
-
-// Editar categoria
-const editButton = () => {
-    $$(".edit-btn").forEach(button => {
-        button.addEventListener("click", () => {
-            const categoryId = button.getAttribute("data-id")
-            showEditCategory(categoryId)
-        })
-    })
+// Actualizar el nombre de una categoria
+const updateCategoryName = (categoryId, newName) => {
+    const updatedCategories = getCategories().map(category =>
+        (category.id === categoryId) ? { ...category, name: newName } : category
+    )
+    updateData(updatedCategories)
+}
+const handleEditCategory = () => {
+    const categoryId = $("#edit-category-button").getAttribute("data-id")
+    const newName = $("#categories-description").value
+    if (categoryId && newName) {
+        updateCategoryName(categoryId, newName)
+        hideElement(["#edit-category"])
+        showElement(["#categories-section"])
+        updateData()
+    }
+}
+// Actualizar categorias 
+const updateCategories = (categorias) => {
+    renderCategoriesTable(categorias)
+    renderCategoriesOptions(categorias)
 }
 
-const showEditCategory = (categoryId) => {
-    showElement(["#edit-category"])
-    $("#categories-description").value = getCategoryNameById(categoryId)
-    hideElement(["#categories-section"])
-}
-
-const getCategoryNameById = (categoryId) => {
-    const categorySelected = allCategories.find(({id}) => id === categoryId)
-    return categorySelected ? categorySelected.name : ''
-}
 
 const initializeProject = () => {
     initialize()
@@ -99,8 +126,8 @@ const initializeProject = () => {
     $("#show-filters").addEventListener("click",hideFilters)
     menuItems()
     editButton()
-    renderCategoriesOptions(allCategories)
-    renderCategoriesTable(allCategories)
+    updateCategories(getCategories())
+    $("#edit-category-button").addEventListener("click", handleEditCategory)
 }
 
 window.addEventListener("load", initializeProject)
