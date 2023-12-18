@@ -38,7 +38,7 @@ const menuItems = () => {
             $$(".section-content").forEach(section => section.classList.add("hidden"))
             let sectionToShow = menuItem.getAttribute("data-section")
             $(`#${sectionToShow}-section`).classList.remove("hidden")
-            hideElement(["#edit-category"])
+            hideElement(["#edit-category", "#transaction"])
         })
     })
 }
@@ -72,9 +72,13 @@ const editButton = () => {
 // Filtros
 const renderCategoriesOptions = (categories) => {
     cleanContainer("#categories-options")
+    cleanContainer("#transaction-categories")
     $("#categories-options").innerHTML = `<option value="">Todas</option>`
     for (const {id, name} of categories) {
         $("#categories-options").innerHTML += `
+            <option value="${id}">${name}</option>
+        `
+        $("#transaction-categories").innerHTML += `
             <option value="${id}">${name}</option>
         `
     }
@@ -99,25 +103,60 @@ const updateCategoryName = (categoryId, newName) => {
     const updatedCategories = getCategories().map(category =>
         (category.id === categoryId) ? { ...category, name: newName } : category
     )
-    updateData(updatedCategories)
+    updateData(updatedCategories, null)
 }
-const handleCancelEdit = () => {
-    hideElement(["#edit-category"])
-    showElement(["#categories-section"])
+const handleCancel = (hideSection, showSection) => {
+    hideElement([hideSection])
+    showElement([showSection])
 }
 const handleEditCategory = () => {
     const categoryId = $("#edit-category-button").getAttribute("data-id")
     const newName = $("#categories-description").value
     if (categoryId && newName) {
         updateCategoryName(categoryId, newName)
-        handleCancelEdit()
-        updateData()
+        handleCancel("#edit-category", "#categories-section")
+    } else {
+        showElement(["#error-modal"])
     }
 }
 // Actualizar categorias 
 const updateCategories = (categorias) => {
     renderCategoriesTable(categorias)
     renderCategoriesOptions(categorias)
+}
+
+// OPERACIONES 
+const showNewTransaction = () => {
+    showElement(["#transaction"])
+    hideElement(["#balance-section"])
+}
+const addNewTransaction = () => {
+    const description = $("#transaction-description").value
+    const amount = parseFloat($("#transaction-amount").value)
+    const type = $("#transaction-type").value
+    const category = $("#transaction-categories").value
+    const day = $("#transaction-day").value
+
+    if (description && !isNaN(amount) && type && category && day) {
+        const newTransaction = {
+            id: randomId(),
+            description,
+            amount,
+            type,
+            category,
+            day,
+        }
+        const updatedTransactions = [...getTransactions(), newTransaction]
+        updateData(null, updatedTransactions)
+
+        $("#transaction-description").value = ""
+        $("#transaction-amount").value = "0"
+        $("#transaction-type").value = "Gasto"
+        $("#transaction-day").value = ""
+        handleCancel("#transaction", "#balance-section")
+    } else {
+        showElement(["#error-modal-transaction"])
+    }
 }
 
 
@@ -131,7 +170,12 @@ const initializeProject = () => {
     editButton()
     updateCategories(getCategories())
     $("#edit-category-button").addEventListener("click", handleEditCategory)
-    $("#edit-category-cancel-button").addEventListener("click", handleCancelEdit)
+    $("#close-error-modal").addEventListener("click", () => hideElement(["#error-modal"]))
+    $("#edit-category-cancel-button").addEventListener("click", () => handleCancel("#edit-category", "#categories-section"))
+    $("#new-transaction").addEventListener("click", showNewTransaction)
+    $("#add-transaction").addEventListener("click", addNewTransaction)
+    $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
+    $("#close-error-modal-transaction").addEventListener("click", () => hideElement(["#error-modal-transaction"]))
 }
 
 window.addEventListener("load", initializeProject)

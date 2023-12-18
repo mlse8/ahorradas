@@ -6,8 +6,13 @@ const setData = (key, data) => localStorage.setItem(key, JSON.stringify(data))
 
 const getCategories = () => getData("data").categories || []
 
-const updateData = (updatedCategories) => {
-    const updatedData = { categories: updatedCategories || getCategories() }
+const getTransactions = () => getData("data").transactions || []
+
+const updateData = (updatedCategories, updatedTransactions) => {
+    const updatedData = { 
+        categories: updatedCategories || getCategories(), 
+        transactions :updatedTransactions || getTransactions()
+    }
     setData("data", updatedData)
     updateCategories(updatedData.categories)
 }
@@ -20,7 +25,8 @@ const data = {
         { id: randomId(), name: "Educación" },
         { id: randomId(), name: "Transporte" },
         { id: randomId(), name: "Trabajo" }
-    ]
+    ],
+    transactions : []
 }
 
 const storedData = getData("data")
