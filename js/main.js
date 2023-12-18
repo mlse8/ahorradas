@@ -101,13 +101,16 @@ const updateCategoryName = (categoryId, newName) => {
     )
     updateData(updatedCategories)
 }
+const handleCancelEdit = () => {
+    hideElement(["#edit-category"])
+    showElement(["#categories-section"])
+}
 const handleEditCategory = () => {
     const categoryId = $("#edit-category-button").getAttribute("data-id")
     const newName = $("#categories-description").value
     if (categoryId && newName) {
         updateCategoryName(categoryId, newName)
-        hideElement(["#edit-category"])
-        showElement(["#categories-section"])
+        handleCancelEdit()
         updateData()
     }
 }
@@ -128,6 +131,7 @@ const initializeProject = () => {
     editButton()
     updateCategories(getCategories())
     $("#edit-category-button").addEventListener("click", handleEditCategory)
+    $("#edit-category-cancel-button").addEventListener("click", handleCancelEdit)
 }
 
 window.addEventListener("load", initializeProject)
