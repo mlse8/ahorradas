@@ -53,6 +53,10 @@ const hideFilters = () =>{
     hideElement(["#show-filters"])
 }
 
+const showErrorModal = (text) =>{
+    $(".error-modal-text").innerText = text
+    showElement(["#error-modal"])
+}
 // CATEGORIAS 
 // Editar
 const showEditCategory = (categoryId) => {
@@ -66,6 +70,15 @@ const editButton = () => {
         button.addEventListener("click", () => {
             const categoryId = button.getAttribute("data-id")
             showEditCategory(categoryId)
+        })
+    })
+}
+//Eliminar
+const deleteButton = () => {
+    $$(".delete-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+            const categoryId = button.getAttribute("data-id")
+            deleteCategory(categoryId)
         })
     })
 }
@@ -92,11 +105,12 @@ const renderCategoriesTable = (categories) => {
                 <p class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${name}</p>
                 <div>
                     <span class="edit-btn mr-4 text-xs text-indigo-700 cursor-pointer hover:text-zinc-700" data-id="${id}">Editar</span>
-                    <span class="text-xs text-indigo-700 cursor-pointer hover:text-zinc-700">Eliminar</span>
+                    <span class="delete-btn text-xs text-indigo-700 cursor-pointer hover:text-zinc-700" data-id="${id}">Eliminar</span>
                 </div>
             </div>`
     }
     editButton()
+    deleteButton()
 }
 // Actualizar el nombre de una categoria
 const updateCategoryName = (categoryId, newName) => {
@@ -116,7 +130,20 @@ const handleEditCategory = () => {
         updateCategoryName(categoryId, newName)
         handleCancel("#edit-category", "#categories-section")
     } else {
-        showElement(["#error-modal"])
+        showErrorModal("El nombre no puede estar vacío")
+    }
+}
+//Eliminar una categoría
+const deleteCategory = (categoryId) => {
+    const categoryName = getCategoryNameById(categoryId)
+    const confirmation = confirm(`¿Estás seguro de eliminar la categoría "${categoryName}"?`)
+
+    if (confirmation) {
+        const updatedCategories = getCategories().filter(({id}) => id !== categoryId)
+        const updatedTransactions = getTransactions().filter(({category}) => category !== categoryId)
+        updateData(updatedCategories, updatedTransactions)
+    } else {
+        showErrorModal("La eliminación fue cancelada")
     }
 }
 // Actualizar categorias 
@@ -155,7 +182,7 @@ const addNewTransaction = () => {
         $("#transaction-day").value = ""
         handleCancel("#transaction", "#balance-section")
     } else {
-        showElement(["#error-modal-transaction"])
+        showErrorModal("Por favor completa todos los campos")
     }
 }
 
@@ -175,7 +202,6 @@ const initializeProject = () => {
     $("#new-transaction").addEventListener("click", showNewTransaction)
     $("#add-transaction").addEventListener("click", addNewTransaction)
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
-    $("#close-error-modal-transaction").addEventListener("click", () => hideElement(["#error-modal-transaction"]))
 }
 
 window.addEventListener("load", initializeProject)

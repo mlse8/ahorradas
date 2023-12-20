@@ -172,12 +172,6 @@
                     <button id="add-transaction" class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600" type="button">Agregar</button>
                 </div>
             </div>
-            <div id="error-modal-transaction" class="w-screen h-screen flex justify-center items-center absolute top-0 right-0 bg-[#2222] hidden">
-                <div class="w-3/4 h-28 p-5 flex justify-center items-center relative bg-white rounded lg:w-1/3 lg:h-24">
-                    <p class="text-xl font-medium text-center">Por favor complete todos los campos.</p>
-                    <span id="close-error-modal-transaction" class="absolute top-1.5 right-2.5 text-3xl font-medium text-red-600 cursor-pointer">&times;</span>
-                </div>
-            </div>
         </section>
         <!-- Editar categoría -->
         <section id="edit-category" class="max-w-3xl m-auto hidden">
@@ -193,12 +187,11 @@
                 </div>
             </div>
         </section>
-        <section>
-            <div id="error-modal" class="w-screen h-screen flex justify-center items-center absolute top-0 right-0 bg-[#2222] lg:h-[calc(100vh-90px)] hidden">
-                <div class="w-3/4 h-28 p-5 flex justify-center items-center relative bg-white rounded lg:w-1/4 lg:h-20">
-                    <p class="text-xl font-medium">El nombre no puede estar vacío.</p>
-                    <span id="close-error-modal" class="absolute top-0 right-2.5 text-3xl font-medium text-red-600 cursor-pointer">&times;</span>
-                </div>
+        <!-- Modal de error -->
+        <section id="error-modal" class="min-h-[calc(100vh-88px)] flex justify-center items-center absolute top-0 right-0 left-0 bottom-0 bg-[#2222] hidden">
+            <div class="w-3/4 h-28 p-5 flex justify-center items-center relative bg-white rounded lg:w-1/4 lg:h-20">
+                <p class="error-modal-text text-xl font-medium"></p>
+                <span id="close-error-modal" class="absolute top-0 right-2.5 text-3xl font-medium text-red-600 cursor-pointer">&times;</span>
             </div>
         </section>
     </main>
