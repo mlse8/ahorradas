@@ -151,6 +151,22 @@ const updateCategories = (categorias) => {
     renderCategoriesTable(categorias)
     renderCategoriesOptions(categorias)
 }
+// Función para agregar una nueva categoría
+const addNewCategory = () => {
+    const categoryName = $("#categories-input").value
+    if (categoryName) {
+        const newCategory = {
+            id: randomId(),
+            name: categoryName,
+        }
+        const updatedCategories = [...getCategories(), newCategory]
+        updateData(updatedCategories, getTransactions())
+        $("#categories-input").value = ""
+    } else {
+        showErrorModal("El nombre no puede estar vacío")
+    }
+}
+
 
 // OPERACIONES 
 const showNewTransaction = () => {
@@ -202,6 +218,7 @@ const initializeProject = () => {
     $("#new-transaction").addEventListener("click", showNewTransaction)
     $("#add-transaction").addEventListener("click", addNewTransaction)
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
+    $("#add-category").addEventListener("click", addNewCategory)
 }
 
 window.addEventListener("load", initializeProject)
