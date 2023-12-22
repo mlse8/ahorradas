@@ -203,6 +203,35 @@ const addNewTransaction = () => {
 }
 
 
+// BALANCE
+const total = (transactionType) => {
+    return getTransactions().filter(({type}) => transactionType === type).reduce((acc, {amount}) => acc + amount, 0)
+}
+const calculateBalance = () => {
+    const totalIncome = total("Ganancia")
+    const totalExpense = total("Gasto")
+    const totalBalance = totalIncome - totalExpense
+
+    return { totalIncome, totalExpense, totalBalance }
+}
+const updateBalance = () => {
+    const { totalIncome, totalExpense, totalBalance } = calculateBalance()
+    $("#income-amount").innerText = `+$${totalIncome.toFixed(2)}`
+    $("#expense-amount").innerText = `-$${totalExpense.toFixed(2)}`
+    let sign = ""
+    if (totalBalance > 0) {
+        $("#total-amount").classList.add("text-green-500")
+        sign = '+'
+    } else if (totalBalance < 0) {
+        $("#total-amount").classList.add("text-red-500")
+        sign = '-'
+    } else {
+        $("#total-amount").classList.remove("text-red-500", "text-green-500")
+    }
+    $("#total-amount").innerText = `${sign}$${Math.abs(totalBalance).toFixed(2)}`
+}
+
+
 const initializeProject = () => {
     initialize()
     $("#open-menu").addEventListener("click", openMenu)
@@ -219,6 +248,7 @@ const initializeProject = () => {
     $("#add-transaction").addEventListener("click", addNewTransaction)
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
     $("#add-category").addEventListener("click", addNewCategory)
+    updateBalance()
 }
 
 window.addEventListener("load", initializeProject)
