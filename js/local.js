@@ -16,6 +16,7 @@ const updateData = (updatedCategories, updatedTransactions) => {
     setData("data", updatedData)
     updateCategories(updatedData.categories)
     updateBalance()
+    renderTransactionsTable(updatedData.transactions)
 }
 
 const data = {

@@ -17,8 +17,9 @@ const cleanContainer = (selector) => $(selector).innerHTML = ""
 
 const getCategoryNameById = (categoryId) => {
     const categorySelected = getCategories().find(({id}) => id === categoryId)
-    return categorySelected ? categorySelected.name : 'nada'
+    return categorySelected ? categorySelected.name : ''
 }
+const getTransactionById = (transactionId) => getTransactions().find(({id}) => id === transactionId)
 
 // Menu 
 const openMenu = () => {
@@ -65,20 +66,20 @@ const showEditCategory = (categoryId) => {
     $("#edit-category-button").setAttribute("data-id", categoryId)
     hideElement(["#categories-section"])
 }
-const editButton = () => {
-    $$(".edit-btn").forEach(button => {
+const editButton = (selectors, callback) => {
+    selectors.forEach(button => {
         button.addEventListener("click", () => {
-            const categoryId = button.getAttribute("data-id")
-            showEditCategory(categoryId)
+            const id = button.getAttribute("data-id")
+            callback(id)
         })
     })
 }
 //Eliminar
-const deleteButton = () => {
-    $$(".delete-btn").forEach((button) => {
+const deleteButton = (selectors, callback) => {
+    selectors.forEach((button) => {
         button.addEventListener("click", () => {
-            const categoryId = button.getAttribute("data-id")
-            deleteCategory(categoryId)
+            const id = button.getAttribute("data-id")
+            callback(id)
         })
     })
 }
@@ -109,8 +110,8 @@ const renderCategoriesTable = (categories) => {
                 </div>
             </div>`
     }
-    editButton()
-    deleteButton()
+    editButton($$(".edit-btn"), (id) => showEditCategory(id))
+    deleteButton($$(".delete-btn"), (id) => deleteCategory(id))
 }
 // Actualizar el nombre de una categoria
 const updateCategoryName = (categoryId, newName) => {
@@ -169,40 +170,92 @@ const addNewCategory = () => {
 
 
 // OPERACIONES 
-const showNewTransaction = () => {
-    showElement(["#transaction"])
-    hideElement(["#balance-section"])
+const saveTransaction = (transactionId) => {
+    return {
+        id: transactionId ? transactionId : randomId(),
+        description: $("#transaction-description").value,
+        amount: $("#transaction-amount").valueAsNumber,
+        type: $("#transaction-type").value,
+        category: $("#transaction-categories").value,
+        day: $("#transaction-day").value
+    }
 }
-const addNewTransaction = () => {
+const showNewTransaction = () => {
+    $("#transaction h2").innerText = "Nueva operación"
+    showElement(["#transaction", "#add-transaction"])
+    hideElement(["#balance-section", "#edit-transaction"])
+}
+const showAndHideTransacions = (transactions) => {
+    if (transactions.length) {
+        showElement(["#transaction-table"])
+        hideElement(["#none-transaction"])
+    } else {
+        hideElement(["#transaction-table"])
+        showElement(["#none-transaction"])
+    }
+}
+const showEditTransaction = (id) => {
+    $("#transaction h2").innerText = "Editar operación"
+    showElement(["#transaction", "#edit-transaction"])
+    hideElement(["#balance-section", "#add-transaction"])
+    $("#edit-transaction").setAttribute("data-id", id)
+    const transaction = getTransactionById(id)
+    populateTransactionForm(transaction)
+}
+const populateTransactionForm = (transaction) => {
+    $("#transaction-description").value = transaction.description
+    $("#transaction-amount").value = transaction.amount
+    $("#transaction-type").value = transaction.type
+    $("#transaction-categories").value = transaction.category
+    $("#transaction-day").value = transaction.day
+}
+const clearTransactionForm = () => {
+    $("#transaction-description").value = ""
+    $("#transaction-amount").value = "0"
+    $("#transaction-type").value = "Gasto"
+    $("#transaction-day").value = ""
+}
+const getTransactionDetails = () => {
     const description = $("#transaction-description").value
-    const amount = parseFloat($("#transaction-amount").value)
+    const amount = $("#transaction-amount").valueAsNumber
     const type = $("#transaction-type").value
     const category = $("#transaction-categories").value
     const day = $("#transaction-day").value
-
+    return { description, amount, type, category, day }
+}
+const addNewTransaction = () => {
+    const { description, amount, type, category, day } = getTransactionDetails()
+    
     if (description && !isNaN(amount) && type && category && day) {
-        const newTransaction = {
-            id: randomId(),
-            description,
-            amount,
-            type,
-            category,
-            day
-        }
-        const updatedTransactions = [...getTransactions(), newTransaction]
+        const updatedTransactions = [...getTransactions(), saveTransaction()]
         updateData(null, updatedTransactions)
         renderTransactionsTable(updatedTransactions)
+        clearTransactionForm()
+        handleCancel("#transaction", "#balance-section")
+    } else {
+        showErrorModal("Por favor completa todos los campos")
+    }
+}
+const updateTransaction = (transactionId) => {
+    const updatedTransactions = getTransactions().map(transaction =>
+        (transaction.id === transactionId) ? saveTransaction(transactionId) : transaction
+    )
+    updateData(null, updatedTransactions)
+}
+const handleEditTransaction = () => {
+    const transactionId = $("#edit-transaction").getAttribute("data-id")
+    const { description, amount, type, category, day } = getTransactionDetails()
 
-        $("#transaction-description").value = ""
-        $("#transaction-amount").value = "0"
-        $("#transaction-type").value = "Gasto"
-        $("#transaction-day").value = ""
+    if (description && !isNaN(amount) && type && category && day) {
+        updateTransaction(transactionId)
+        clearTransactionForm()
         handleCancel("#transaction", "#balance-section")
     } else {
         showErrorModal("Por favor completa todos los campos")
     }
 }
 const renderTransactionsTable = (transactions) => {
+    showAndHideTransacions(transactions)
     cleanContainer("#transaction-table-body")
     for (const {id, description, amount, type, category, day} of transactions) {
         $("#transaction-table-body").innerHTML += `
@@ -223,8 +276,20 @@ const renderTransactionsTable = (transactions) => {
                 </div>
             </li>`
     }
+    editButton($$(".edit-transaction-btn"), (id) => showEditTransaction(id))
+    deleteButton($$(".delete-transaction-btn"), (id) => deleteTransaction(id))
 }
+const deleteTransaction = (transactionId) => {
+    const description = getTransactionById(transactionId).description
+    const confirmation = confirm(`¿Estás seguro de eliminar la operación ${description}?`)
 
+    if (confirmation) {
+        const updatedTransactions = getTransactions().filter(({id}) => id !== transactionId)
+        updateData(null, updatedTransactions)
+    } else {
+        showErrorModal("La eliminación fue cancelada")
+    }
+}
 
 // BALANCE
 const total = (transactionType) => {
@@ -244,9 +309,11 @@ const updateBalance = () => {
     let sign = ""
     if (totalBalance > 0) {
         $("#total-amount").classList.add("text-green-500")
+        $("#total-amount").classList.remove("text-red-500")
         sign = '+'
     } else if (totalBalance < 0) {
         $("#total-amount").classList.add("text-red-500")
+        $("#total-amount").classList.remove("text-green-500")
         sign = '-'
     } else {
         $("#total-amount").classList.remove("text-red-500", "text-green-500")
@@ -262,7 +329,7 @@ const initializeProject = () => {
     $("#hide-filters").addEventListener("click",showFilters)
     $("#show-filters").addEventListener("click",hideFilters)
     menuItems()
-    editButton()
+    // editButton()
     updateCategories(getCategories())
     $("#edit-category-button").addEventListener("click", handleEditCategory)
     $("#close-error-modal").addEventListener("click", () => hideElement(["#error-modal"]))
@@ -271,8 +338,9 @@ const initializeProject = () => {
     $("#add-transaction").addEventListener("click", addNewTransaction)
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
     $("#add-category").addEventListener("click", addNewCategory)
-    updateBalance()
+    // updateBalance()
     renderTransactionsTable(getTransactions())
+    $("#edit-transaction").addEventListener("click", handleEditTransaction)
 }
 
 window.addEventListener("load", initializeProject)
