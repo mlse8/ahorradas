@@ -220,7 +220,7 @@ const clearTransactionForm = () => {
     $("#transaction-description").value = ""
     $("#transaction-amount").value = "0"
     $("#transaction-type").value = "Gasto"
-    $("#transaction-day").value = ""
+    $("#transaction-day").valueAsDate = date
 }
 const getTransactionDetails = () => {
     const description = $("#transaction-description").value
@@ -236,7 +236,6 @@ const addNewTransaction = () => {
     if (description && !isNaN(amount) && type && category && day) {
         const updatedTransactions = [...getTransactions(), saveTransaction()]
         updateData(null, updatedTransactions)
-        renderTransactionsTable(updatedTransactions)
         clearTransactionForm()
         handleCancel("#transaction", "#balance-section")
     } else {
@@ -299,20 +298,20 @@ const deleteTransaction = (transactionId) => {
 }
 
 // BALANCE
-const total = (transactionType) => {
-    return getTransactions().filter(({type}) => transactionType === type).reduce((acc, {amount}) => acc + amount, 0)
+const total = (transactionType, transactions) => {
+    return transactions.filter(({type}) => transactionType === type).reduce((acc, {amount}) => acc + amount, 0)
 }
-const calculateBalance = () => {
-    const totalIncome = total("Ganancia")
-    const totalExpense = total("Gasto")
+const calculateBalance = (transactions) => {
+    const totalIncome = total("Ganancia", transactions)
+    const totalExpense = total("Gasto", transactions)
     const totalBalance = totalIncome - totalExpense
 
     return { totalIncome, totalExpense, totalBalance }
 }
-const updateBalance = () => {
-    const { totalIncome, totalExpense, totalBalance } = calculateBalance()
-    $("#income-amount").innerText = `+$${totalIncome.toFixed(2)}`
-    $("#expense-amount").innerText = `-$${totalExpense.toFixed(2)}`
+const updateBalance = (transactions) => {
+    const { totalIncome, totalExpense, totalBalance } = calculateBalance(transactions)
+    $("#income-amount").innerText = `+$${Math.abs(totalIncome).toFixed(2)}`
+    $("#expense-amount").innerText = `-$${Math.abs(totalExpense).toFixed(2)}`
     let sign = ""
     if (totalBalance > 0) {
         $("#total-amount").classList.add("text-green-500")
@@ -326,6 +325,71 @@ const updateBalance = () => {
         $("#total-amount").classList.remove("text-red-500", "text-green-500")
     }
     $("#total-amount").innerText = `${sign}$${Math.abs(totalBalance).toFixed(2)}`
+}
+
+// FILTROS
+const typeFilter = (transactions, transactionType) => transactions.filter(({ type }) => type === transactionType)
+const categoryFilter = (transactions, transactionCategory) => transactions.filter(({ category }) => category === transactionCategory)
+const dateFilter = (transactions, transactionDate) => transactions.filter(({ day }) => new Date(day).getTime() >= transactionDate.getTime())
+
+const orderByDate = (transactions, order) => {
+    return [...transactions].sort((a, b) => {
+        const dateA = new Date(a.day).getTime()
+        const dateB = new Date(b.day).getTime()
+        return order === 'recent' ? dateB - dateA : dateA - dateB
+    })
+}
+
+const orderByAmount = (transactions, order) => {
+    return [...transactions].sort((a, b) => {
+        return order === 'max' ? b.amount - a.amount : a.amount - b.amount
+    })
+}
+
+const orderByAlphabetically = (transactions, order) => {
+    return [...transactions].sort((a, b) => {
+        const descriptionA = a.description.toLowerCase()
+        const descriptionB = b.description.toLowerCase()
+        return order === 'aZ' ? descriptionA.localeCompare(descriptionB) : descriptionB.localeCompare(descriptionA)
+    })
+}
+
+const filters = () => {
+    const type = $("#type").value
+    const category = $("#categories-options").value
+    const day = new Date($("#day").value)
+    const selectedOption = $("#order").value
+    let transactions = getTransactions()
+    
+    if (type != "Todos")
+        transactions = typeFilter(transactions, type)
+    if (category != "")
+        transactions = categoryFilter(transactions, category)
+    transactions = dateFilter(transactions, day)
+
+    switch (selectedOption) {
+        case 'recent':
+            transactions = orderByDate(transactions, selectedOption)
+            break
+        case 'older':
+            transactions = orderByDate(transactions, selectedOption)
+            break
+        case 'max':
+            transactions = orderByAmount(transactions, selectedOption)
+            break
+        case 'min':
+            transactions = orderByAmount(transactions, selectedOption)
+            break
+        case 'aZ':
+            transactions = orderByAlphabetically(transactions, selectedOption)
+            break
+        case 'zA':
+            transactions = orderByAlphabetically(transactions, selectedOption)
+            break
+    }
+
+    renderTransactionsTable(transactions)
+    updateBalance(transactions)
 }
 
 
@@ -345,9 +409,14 @@ const initializeProject = () => {
     $("#add-transaction").addEventListener("click", addNewTransaction)
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
     $("#add-category").addEventListener("click", addNewCategory)
-    updateBalance()
+    updateBalance(getTransactions())
     renderTransactionsTable(getTransactions())
     $("#edit-transaction").addEventListener("click", handleEditTransaction)
+    $("#type").addEventListener("change", filters)
+    $("#categories-options").addEventListener("change", filters)
+    $("#day").addEventListener("change", filters)
+    $("#order").addEventListener("change", filters)
+    filters()
 }
 
 window.addEventListener("load", initializeProject)

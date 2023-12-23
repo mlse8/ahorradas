@@ -15,8 +15,9 @@ const updateData = (updatedCategories, updatedTransactions) => {
     }
     setData("data", updatedData)
     updateCategories(updatedData.categories)
-    updateBalance()
+    updateBalance(updatedData.transactions)
     renderTransactionsTable(updatedData.transactions)
+    filters()
 }
 
 const data = {
