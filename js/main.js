@@ -1,6 +1,13 @@
 const $ = (selector) => document.querySelector(selector)
 const $$ = (selector) => document.querySelectorAll(selector)
 
+// Establecer fechas
+const today = new Date()
+const date = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+$("#transaction-day").valueAsDate = date
+const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+$("#day").valueAsDate = firstDayOfMonth
+
 const hideElement = (selectors) => {
     for (const selector of selectors) {
         $(selector).classList.add("hidden")
@@ -225,7 +232,7 @@ const getTransactionDetails = () => {
 }
 const addNewTransaction = () => {
     const { description, amount, type, category, day } = getTransactionDetails()
-    
+
     if (description && !isNaN(amount) && type && category && day) {
         const updatedTransactions = [...getTransactions(), saveTransaction()]
         updateData(null, updatedTransactions)
@@ -338,7 +345,7 @@ const initializeProject = () => {
     $("#add-transaction").addEventListener("click", addNewTransaction)
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
     $("#add-category").addEventListener("click", addNewCategory)
-    // updateBalance()
+    updateBalance()
     renderTransactionsTable(getTransactions())
     $("#edit-transaction").addEventListener("click", handleEditTransaction)
 }
