@@ -187,10 +187,11 @@ const addNewTransaction = () => {
             amount,
             type,
             category,
-            day,
+            day
         }
         const updatedTransactions = [...getTransactions(), newTransaction]
         updateData(null, updatedTransactions)
+        renderTransactionsTable(updatedTransactions)
 
         $("#transaction-description").value = ""
         $("#transaction-amount").value = "0"
@@ -199,6 +200,28 @@ const addNewTransaction = () => {
         handleCancel("#transaction", "#balance-section")
     } else {
         showErrorModal("Por favor completa todos los campos")
+    }
+}
+const renderTransactionsTable = (transactions) => {
+    cleanContainer("#transaction-table-body")
+    for (const {id, description, amount, type, category, day} of transactions) {
+        $("#transaction-table-body").innerHTML += `
+            <li class="py-4 flex flex-col justify-between gap-6 md:flex-row md:justify-cente">
+                <div class="flex justify-between md:w-2/5">
+                    <h3 class="font-medium">${description}</h3>
+                    <p class="md:w-1/2">
+                        <span class="px-2 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${getCategoryNameById(category)}</span>
+                    </p>
+                </div>
+                <div class="flex justify-between items-center md:w-3/5 md:items-start">
+                    <span class="hidden md:inline-block md:w-1/3 md:text-right">${day}</span>
+                    ${type === "Gasto" ? `<span class="w-7/12 text-2xl font-bold text-red-500 break-words md:w-1/4 md:text-base md:text-right">-$${amount}</span>` : `<span class="w-7/12 text-2xl font-bold text-green-500 break-words md:w-1/4 md:text-base md:text-right">+$${amount}</span>`}
+                    <p class="text-xs text-indigo-700 lg:w-1/4">
+                        <span class="edit-transaction-btn mr-4 cursor-pointer hover:text-zinc-700 lg:block lg:mr-0 lg:text-right" data-id="${id}">Editar</span>
+                        <span class="delete-transaction-btn cursor-pointer hover:text-zinc-700 lg:block lg:text-right" data-id="${id}">Eliminar</span>
+                    </p>
+                </div>
+            </li>`
     }
 }
 
@@ -249,6 +272,7 @@ const initializeProject = () => {
     $("#transaction-cancel-button").addEventListener("click", () => handleCancel("#transaction", "#balance-section"))
     $("#add-category").addEventListener("click", addNewCategory)
     updateBalance()
+    renderTransactionsTable(getTransactions())
 }
 
 window.addEventListener("load", initializeProject)
