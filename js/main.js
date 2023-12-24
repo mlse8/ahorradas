@@ -392,6 +392,83 @@ const filters = () => {
     updateBalance(transactions)
 }
 
+//REPORTES
+const totalAmountByCategory = () => {
+    return getTransactions().reduce((acc, transaction) => {
+        const { category, amount, type } = transaction
+        const transactionAmount = type === 'Ganancia' ? amount : -amount 
+        acc[category] = (acc[category] || 0) + transactionAmount
+        return acc
+    }, {})
+}
+// Categoría con mayor ganancia
+const categoryWithMaxIncome = () => { 
+    const totalAmounts = totalAmountByCategory()
+    let maxCategory = Object.keys(totalAmounts)[0]
+
+    for (const category in totalAmounts) {
+        if (totalAmounts[category] > totalAmounts[maxCategory]) {
+            maxCategory = category
+        }
+    }
+    const categoryName = getCategoryNameById(maxCategory)
+    const maxAmount = totalAmounts[maxCategory]
+
+    return { categoryName, maxAmount }
+}
+// Categoría con mayor gasto
+const categoryWithMaxExpense = () => { 
+    const totalAmounts = totalAmountByCategory()
+    let maxCategory = Object.keys(totalAmounts)[0]
+
+    for (const category in totalAmounts) {
+        if (totalAmounts[category] < totalAmounts[maxCategory]) {
+            maxCategory = category
+        }
+    }
+
+    const categoryName = getCategoryNameById(maxCategory)
+    const maxAmount = totalAmounts[maxCategory]
+
+    return { categoryName, maxAmount }
+}
+
+const getTotalAmountByMonth = (transactions, transactionType) => {
+    return transactions.reduce((acc, transaction) => {
+        if (transaction.type === transactionType) {
+            const month = new Date(transaction.day).getMonth()
+            acc[month] = (acc[month] || 0) + transaction.amount
+        }
+        return acc
+    }, {})
+}
+
+const getMonthWithMaxAmount = (totalAmounts) => {
+    let maxMonth = Object.keys(totalAmounts)[0]
+
+    for (const month in totalAmounts) {
+        if (totalAmounts[month] > totalAmounts[maxMonth]) {
+            maxMonth = month;
+        }
+    }
+
+    return parseInt(maxMonth)
+}
+// Mes con mayor ganancia
+const monthWithMaxIncome = () => {
+    const totalAmounts = getTotalAmountByMonth(getTransactions(), 'Ganancia')
+    const maxMonth = getMonthWithMaxAmount(totalAmounts)
+
+    return { maxMonth, maxAmount: totalAmounts[maxMonth] }
+}
+// Mes con mayor gasto
+const monthWithMaxExpense = () => {
+    const totalAmounts = getTotalAmountByMonth(getTransactions(), 'Gasto')
+    const maxMonth = getMonthWithMaxAmount(totalAmounts)
+
+    return { maxMonth, maxAmount: totalAmounts[maxMonth] }
+}
+
 
 const initializeProject = () => {
     initialize()
@@ -417,6 +494,10 @@ const initializeProject = () => {
     $("#day").addEventListener("change", filters)
     $("#order").addEventListener("change", filters)
     filters()
+    console.log('Categoría con mayor ganancia:', categoryWithMaxIncome())
+    console.log('Categoría con mayor gasto:', categoryWithMaxExpense())
+    console.log("Mes con mayor ganancia:", monthWithMaxIncome())
+    console.log("Mes con mayor gasto:", monthWithMaxExpense())
 }
 
 window.addEventListener("load", initializeProject)
