@@ -19,6 +19,7 @@ const updateData = (updatedCategories, updatedTransactions) => {
     renderTransactionsTable(updatedData.transactions)
     filters()
     renderSummary()
+    renderTotalCategories()
 }
 
 const data = {

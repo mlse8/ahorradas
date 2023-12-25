@@ -406,131 +406,168 @@ const filters = () => {
 }
 
 //REPORTES
+// Obtener el total de ganancias, gastos y balance por categoría
 const totalAmountByCategory = () => {
     return getTransactions().reduce((acc, transaction) => {
         const { category, amount, type } = transaction
-        const transactionAmount = type === 'Ganancia' ? amount : -amount 
-        acc[category] = (acc[category] || 0) + transactionAmount
+        const transactionAmount = type === 'Ganancia' ? amount : -amount
+
+        if (!acc[category]) {
+            acc[category] = {
+                totalIncome: 0,
+                totalExpense: 0,
+                totalBalance: 0,
+            }
+        }
+
+        if (type === 'Ganancia') {
+            acc[category].totalIncome += amount
+        } else {
+            acc[category].totalExpense += amount
+        }
+
+        acc[category].totalBalance += transactionAmount
+
         return acc
     }, {})
 }
-// Categoría con mayor ganancia
-const categoryWithMaxIncome = () => { 
+// Categoría con un mayor valor
+const categoryWithMaxValue = (property) => {
     const totalAmounts = totalAmountByCategory()
     let maxCategory = Object.keys(totalAmounts)[0]
 
     for (const category in totalAmounts) {
-        if (totalAmounts[category] > totalAmounts[maxCategory]) {
-            maxCategory = category
-        }
-    }
-    const categoryName = getCategoryNameById(maxCategory)
-    const maxAmount = totalAmounts[maxCategory]
-
-    return { categoryName, maxAmount }
-}
-// Categoría con mayor gasto
-const categoryWithMaxExpense = () => { 
-    const totalAmounts = totalAmountByCategory()
-    let maxCategory = Object.keys(totalAmounts)[0]
-
-    for (const category in totalAmounts) {
-        if (totalAmounts[category] < totalAmounts[maxCategory]) {
+        if (totalAmounts[category][property] > totalAmounts[maxCategory][property]) {
             maxCategory = category
         }
     }
 
     const categoryName = getCategoryNameById(maxCategory)
-    const maxAmount = totalAmounts[maxCategory]
+    const maxAmount = totalAmounts[maxCategory][property]
 
     return { categoryName, maxAmount }
 }
+// Obtener el total de ganancias, gastos y balance por mes
+const totalAmountByMonth = () => {
+    return getTransactions().reduce((acc, transaction) => {
+        const { day, amount, type } = transaction;
+        const transactionAmount = type === 'Ganancia' ? amount : -amount
 
-const getTotalAmountByMonth = (transactions, transactionType) => {
-    return transactions.reduce((acc, transaction) => {
-        if (transaction.type === transactionType) {
-            const month = new Date(transaction.day).getMonth()
-            acc[month] = (acc[month] || 0) + transaction.amount
+        const month = new Date(day).getMonth()
+
+        if (!acc[month]) {
+            acc[month] = {
+                totalIncome: 0,
+                totalExpense: 0,
+                totalBalance: 0,
+            };
         }
+
+        if (type === 'Ganancia') {
+            acc[month].totalIncome += amount
+        } else {
+            acc[month].totalExpense += amount
+        }
+
+        acc[month].totalBalance += transactionAmount
+
         return acc
     }, {})
 }
-
-const getMonthWithMaxAmount = (totalAmounts) => {
+// Mes con un mayor valor
+const monthWithMaxValue = (property) => {
+    const totalAmounts = totalAmountByMonth()
     let maxMonth = Object.keys(totalAmounts)[0]
 
     for (const month in totalAmounts) {
-        if (totalAmounts[month] > totalAmounts[maxMonth]) {
+        if (totalAmounts[month][property] > totalAmounts[maxMonth][property]) {
             maxMonth = month
         }
     }
 
-    return parseInt(maxMonth)
-}
-// Mes con mayor ganancia
-const monthWithMaxIncome = () => {
-    const totalAmounts = getTotalAmountByMonth(getTransactions(), 'Ganancia')
-    const maxMonth = getMonthWithMaxAmount(totalAmounts)
+    const maxAmount = totalAmounts[maxMonth][property]
 
-    return { maxMonth, maxAmount: totalAmounts[maxMonth] }
+    return { maxMonth, maxAmount }
 }
-// Mes con mayor gasto
-const monthWithMaxExpense = () => {
-    const totalAmounts = getTotalAmountByMonth(getTransactions(), 'Gasto')
-    const maxMonth = getMonthWithMaxAmount(totalAmounts)
 
-    return { maxMonth, maxAmount: totalAmounts[maxMonth] }
-}
 // Cargar reportes
+// Resumen
 const renderCategoryWithMaxIncome = () => {
-    const { categoryName, maxAmount } = categoryWithMaxIncome()
+    const { categoryName, maxAmount } = categoryWithMaxValue("totalIncome")
     $(".reports-summary").innerHTML = `
         <li class="my-6 md:flex md:justify-between">
             <p class="mb-2 font-medium md:mb-0">Categoría con mayor ganancia</p>
             <div class="flex justify-between md:w-1/3">
                 <span class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${categoryName}</span>
-                <span class="text-base font-medium text-green-500">+$${maxAmount}</span>
+                <span class="font-medium text-green-500">+$${maxAmount}</span>
             </div>
         </li>`
 }
 const renderCategoryWithMaxExpense = () => {
-    const { categoryName, maxAmount } = categoryWithMaxExpense()
+    const { categoryName, maxAmount } = categoryWithMaxValue("totalExpense")
     $(".reports-summary").innerHTML += `
         <li class="my-6 md:flex md:justify-between">
             <p class="mb-2 font-medium md:mb-0">Categoría con mayor gasto</p>
             <div class="flex justify-between md:w-1/3">
                 <span class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${categoryName}</span>
-                <span class="text-base font-medium text-red-500">-$${Math.abs(maxAmount)}</span>
+                <span class="font-medium text-red-500">-$${maxAmount}</span>
+            </div>
+        </li>`
+}
+const renderCategoryWithMaxBalance = () => {
+    const { categoryName, maxAmount } = categoryWithMaxValue("totalBalance")
+    $(".reports-summary").innerHTML += `
+        <li class="my-6 md:flex md:justify-between">
+            <p class="mb-2 font-medium md:mb-0">Categoría con mayor balance</p>
+            <div class="flex justify-between md:w-1/3">
+                <span class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${categoryName}</span>
+                <span class="font-medium">$${maxAmount}</span>
             </div>
         </li>`
 }
 const renderMonthWithMaxIncome = () => {
-    const { maxMonth, maxAmount } = monthWithMaxIncome()
+    const { maxMonth, maxAmount } = monthWithMaxValue("totalIncome")
     $(".reports-summary").innerHTML += `
         <li class="my-6 md:flex md:justify-between">
             <p class="mb-2 font-medium md:mb-0">Mes con mayor ganancia</p>
             <div class="flex justify-between md:w-1/3">
                 <span>${getMonthName(maxMonth)}</span>
-                <span class="text-base font-medium text-green-500">+$${(maxAmount)}</span>
+                <span class="font-medium text-green-500">+$${(maxAmount)}</span>
             </div>
         </li>`
 }
 const renderMonthWithMaxExpense = () => {
-    const { maxMonth, maxAmount } = monthWithMaxExpense()
+    const { maxMonth, maxAmount } = monthWithMaxValue("totalExpense")
     $(".reports-summary").innerHTML += `
         <li class="my-6 md:flex md:justify-between">
             <p class="mb-2 font-medium md:mb-0">Mes con mayor gasto</p>
             <div class="flex justify-between md:w-1/3">
                 <span>${getMonthName(maxMonth)}</span>
-                <span class="text-base font-medium text-red-500">-$${(maxAmount)}</span>
+                <span class="font-medium text-red-500">-$${(maxAmount)}</span>
             </div>
         </li>`
 }
 const renderSummary = () => {
     renderCategoryWithMaxIncome()
     renderCategoryWithMaxExpense()
+    renderCategoryWithMaxBalance()
     renderMonthWithMaxIncome()
     renderMonthWithMaxExpense()
+}
+// Totales por categorías
+const renderTotalCategories = () => {
+    const totalsByCategory = totalAmountByCategory()
+    cleanContainer(".reports-categories")
+    for (const category in totalsByCategory) {
+        const { totalIncome, totalExpense, totalBalance } = totalsByCategory[category]
+        $(".reports-categories").innerHTML += `
+            <tr>
+                <td class="pr-4 pb-6 font-medium md:pr-0">${getCategoryNameById(category)}</td>
+                <td class="pr-4 pb-6 text-right text-green-500 md:pr-0">+$${totalIncome}</td>
+                <td class="pr-4 pb-6 text-right text-red-500 md:pr-0">-$${totalExpense}</td>
+                <td class="pb-6 text-right">$${totalBalance}</td>
+            </tr>`
+    }
 }
 
 
@@ -559,6 +596,7 @@ const initializeProject = () => {
     $("#order").addEventListener("change", filters)
     filters()
     renderSummary()
+    renderTotalCategories()
 }
 
 window.addEventListener("load", initializeProject)
