@@ -18,8 +18,7 @@ const updateData = (updatedCategories, updatedTransactions) => {
     updateBalance(updatedData.transactions)
     renderTransactionsTable(updatedData.transactions)
     filters()
-    renderSummary()
-    renderTotalCategories()
+    updateReports()
 }
 
 const data = {

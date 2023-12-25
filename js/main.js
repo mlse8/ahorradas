@@ -569,6 +569,33 @@ const renderTotalCategories = () => {
             </tr>`
     }
 }
+// Totales por mes
+const renderTotalMonths = () => {
+    const totalsByMonth = totalAmountByMonth()
+    cleanContainer(".reports-months")
+    for (const month in totalsByMonth) {
+        const { totalIncome, totalExpense, totalBalance } = totalsByMonth[month]
+        $(".reports-months").innerHTML += `
+            <tr>
+                <td class="pr-4 pb-6 font-medium md:pr-0">${getMonthName(month)}</td>
+                <td class="pr-4 pb-6 text-right text-green-500 md:pr-0">+$${totalIncome}</td>
+                <td class="pr-4 pb-6 text-right text-red-500 md:pr-0">-$${totalExpense}</td>
+                <td class="pb-6 text-right">$${totalBalance}</td>
+            </tr>`
+    }
+}
+const updateReports = () => {
+    if (getTransactions().length > 2) {
+        showElement([".has-reports"])
+        hideElement([".none-reports"])
+        renderSummary()
+        renderTotalCategories()
+        renderTotalMonths()
+    } else {
+        showElement([".none-reports"])
+        hideElement([".has-reports"])
+    }
+}
 
 
 const initializeProject = () => {
@@ -595,8 +622,7 @@ const initializeProject = () => {
     $("#day").addEventListener("change", filters)
     $("#order").addEventListener("change", filters)
     filters()
-    renderSummary()
-    renderTotalCategories()
+    updateReports()
 }
 
 window.addEventListener("load", initializeProject)
