@@ -8,6 +8,19 @@ $("#transaction-day").valueAsDate = date
 const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 $("#day").valueAsDate = firstDayOfMonth
 
+// Obtener nombre de mes
+const getMonthName = (monthNumber) => {
+    const months = [
+        "Enero", "Febrero", "Marzo", "Abril",
+        "Mayo", "Junio", "Julio", "Agosto",
+        "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ]
+
+    if (monthNumber >= 1 && monthNumber <= 12) {
+        return months[monthNumber]
+    }
+}
+
 const hideElement = (selectors) => {
     for (const selector of selectors) {
         $(selector).classList.add("hidden")
@@ -448,7 +461,7 @@ const getMonthWithMaxAmount = (totalAmounts) => {
 
     for (const month in totalAmounts) {
         if (totalAmounts[month] > totalAmounts[maxMonth]) {
-            maxMonth = month;
+            maxMonth = month
         }
     }
 
@@ -467,6 +480,57 @@ const monthWithMaxExpense = () => {
     const maxMonth = getMonthWithMaxAmount(totalAmounts)
 
     return { maxMonth, maxAmount: totalAmounts[maxMonth] }
+}
+// Cargar reportes
+const renderCategoryWithMaxIncome = () => {
+    const { categoryName, maxAmount } = categoryWithMaxIncome()
+    $(".reports-summary").innerHTML = `
+        <li class="my-6 md:flex md:justify-between">
+            <p class="mb-2 font-medium md:mb-0">Categoría con mayor ganancia</p>
+            <div class="flex justify-between md:w-1/3">
+                <span class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${categoryName}</span>
+                <span class="text-base font-medium text-green-500">+$${maxAmount}</span>
+            </div>
+        </li>`
+}
+const renderCategoryWithMaxExpense = () => {
+    const { categoryName, maxAmount } = categoryWithMaxExpense()
+    $(".reports-summary").innerHTML += `
+        <li class="my-6 md:flex md:justify-between">
+            <p class="mb-2 font-medium md:mb-0">Categoría con mayor gasto</p>
+            <div class="flex justify-between md:w-1/3">
+                <span class="px-3 py-1 text-xs text-emerald-600 bg-emerald-50 rounded">${categoryName}</span>
+                <span class="text-base font-medium text-red-500">-$${Math.abs(maxAmount)}</span>
+            </div>
+        </li>`
+}
+const renderMonthWithMaxIncome = () => {
+    const { maxMonth, maxAmount } = monthWithMaxIncome()
+    $(".reports-summary").innerHTML += `
+        <li class="my-6 md:flex md:justify-between">
+            <p class="mb-2 font-medium md:mb-0">Mes con mayor ganancia</p>
+            <div class="flex justify-between md:w-1/3">
+                <span>${getMonthName(maxMonth)}</span>
+                <span class="text-base font-medium text-green-500">+$${(maxAmount)}</span>
+            </div>
+        </li>`
+}
+const renderMonthWithMaxExpense = () => {
+    const { maxMonth, maxAmount } = monthWithMaxExpense()
+    $(".reports-summary").innerHTML += `
+        <li class="my-6 md:flex md:justify-between">
+            <p class="mb-2 font-medium md:mb-0">Mes con mayor gasto</p>
+            <div class="flex justify-between md:w-1/3">
+                <span>${getMonthName(maxMonth)}</span>
+                <span class="text-base font-medium text-red-500">-$${(maxAmount)}</span>
+            </div>
+        </li>`
+}
+const renderSummary = () => {
+    renderCategoryWithMaxIncome()
+    renderCategoryWithMaxExpense()
+    renderMonthWithMaxIncome()
+    renderMonthWithMaxExpense()
 }
 
 
@@ -494,10 +558,7 @@ const initializeProject = () => {
     $("#day").addEventListener("change", filters)
     $("#order").addEventListener("change", filters)
     filters()
-    console.log('Categoría con mayor ganancia:', categoryWithMaxIncome())
-    console.log('Categoría con mayor gasto:', categoryWithMaxExpense())
-    console.log("Mes con mayor ganancia:", monthWithMaxIncome())
-    console.log("Mes con mayor gasto:", monthWithMaxExpense())
+    renderSummary()
 }
 
 window.addEventListener("load", initializeProject)
