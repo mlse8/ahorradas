@@ -1,5 +1,3 @@
-const randomId = () => self.crypto.randomUUID()
-
 const getData = (key) => JSON.parse(localStorage.getItem(key))
 
 const setData = (key, data) => localStorage.setItem(key, JSON.stringify(data))
