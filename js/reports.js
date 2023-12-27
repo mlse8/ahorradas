@@ -195,7 +195,11 @@ const renderTotalMonths = () => {
 
 // Actualizar reportes
 const updateReports = () => {
-    if (getTransactions().length > 2) {
+    const transactions = getTransactions()
+    const hasIncome = transactions.some(({type}) => type === 'Ganancia')
+    const hasExpense = transactions.some(({type}) => type === 'Gasto')
+
+    if (hasIncome && hasExpense) {
         showElement([".has-reports"])
         hideElement([".none-reports"])
         renderSummary()
