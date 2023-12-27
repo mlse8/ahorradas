@@ -1,5 +1,5 @@
 // Obtener nombre del mes
-const getMonthName = (monthNumber) => {
+const getMonthWithYear = (monthNumber, year) => {
     const months = [
         "Enero", "Febrero", "Marzo", "Abril",
         "Mayo", "Junio", "Julio", "Agosto",
@@ -7,7 +7,7 @@ const getMonthName = (monthNumber) => {
     ]
 
     if (monthNumber >= 0 && monthNumber <= 11) {
-        return months[monthNumber]
+        return `${months[monthNumber]}/${year}`
     }
 }
 
@@ -57,26 +57,31 @@ const categoryWithMaxValue = (property) => {
 // Obtener el total de ganancias, gastos y balance por mes
 const totalAmountByMonth = () => {
     return getTransactions().reduce((acc, transaction) => {
-        const { day, amount, type } = transaction;
+        const { day, amount, type } = transaction
         const transactionAmount = type === 'Ganancia' ? amount : -amount
 
+        const year = new Date(day).getFullYear()
         const month = new Date(day).getMonth()
 
-        if (!acc[month]) {
-            acc[month] = {
+        if (!acc[year]) {
+            acc[year] = {}
+        }
+
+        if (!acc[year][month]) {
+            acc[year][month] = {
                 totalIncome: 0,
                 totalExpense: 0,
                 totalBalance: 0,
-            };
+            }
         }
 
         if (type === 'Ganancia') {
-            acc[month].totalIncome += amount
+            acc[year][month].totalIncome += amount
         } else {
-            acc[month].totalExpense += amount
+            acc[year][month].totalExpense += amount
         }
 
-        acc[month].totalBalance += transactionAmount
+        acc[year][month].totalBalance += transactionAmount
 
         return acc
     }, {})
@@ -85,15 +90,18 @@ const totalAmountByMonth = () => {
 // Mes con un mayor valor
 const monthWithMaxValue = (property) => {
     const totalAmounts = totalAmountByMonth()
-    let maxMonth = Object.keys(totalAmounts)[0]
+    let maxMonth = { year: null, month: null }
+    let maxAmount = null
 
-    for (const month in totalAmounts) {
-        if (totalAmounts[month][property] > totalAmounts[maxMonth][property]) {
-            maxMonth = month
+    for (const year in totalAmounts) {
+        for (const month in totalAmounts[year]) {
+            const currentAmount = totalAmounts[year][month][property]
+            if (maxAmount === null || currentAmount > maxAmount) {
+                maxAmount = currentAmount
+                maxMonth = { year, month }
+            }
         }
     }
-
-    const maxAmount = totalAmounts[maxMonth][property]
 
     return { maxMonth, maxAmount }
 }
@@ -119,7 +127,7 @@ const renderMonthSummary = (title, property, amount) => {
         <li class="my-6 md:flex md:justify-between">
             <p class="mb-2 font-medium md:mb-0">${title}</p>
             <div class="flex justify-between md:w-1/3">
-                <span>${getMonthName(maxMonth)}</span>
+                <span>${getMonthWithYear(maxMonth.month, maxMonth.year)}</span>
                 <span class="font-medium ${amount < 0 ? 'text-red-500' : 'text-green-500'}">${amount > 0 ? '+' : '-'}$${Math.abs(maxAmount).toFixed(2)}</span>
             </div>
         </li>`
@@ -171,15 +179,17 @@ const renderTotalCategories = () => {
 const renderTotalMonths = () => {
     const totalsByMonth = totalAmountByMonth()
     cleanContainer(".reports-months")
-    for (const month in totalsByMonth) {
-        const { totalIncome, totalExpense, totalBalance } = totalsByMonth[month]
-        $(".reports-months").innerHTML += `
-            <tr>
-                <td class="pr-4 pb-6 font-medium md:pr-0">${getMonthName(month)}</td>
-                <td class="pr-4 pb-6 text-right text-green-500 md:pr-0">+$${totalIncome.toFixed(2)}</td>
-                <td class="pr-4 pb-6 text-right text-red-500 md:pr-0">-$${totalExpense.toFixed(2)}</td>
-                <td class="pb-6 text-right">$${totalBalance.toFixed(2)}</td>
-            </tr>`
+    for (const year in totalsByMonth) {
+        for (const month in totalsByMonth[year]) {
+            const { totalIncome, totalExpense, totalBalance } = totalsByMonth[year][month]
+            $(".reports-months").innerHTML += `
+                <tr>
+                    <td class="pr-4 pb-6 font-medium md:pr-0">${getMonthWithYear(month, year)}</td>
+                    <td class="pr-4 pb-6 text-right text-green-500 md:pr-0">+$${totalIncome.toFixed(2)}</td>
+                    <td class="pr-4 pb-6 text-right text-red-500 md:pr-0">-$${totalExpense.toFixed(2)}</td>
+                    <td class="pb-6 text-right">$${totalBalance.toFixed(2)}</td>
+                </tr>`
+        }
     }
 }
 
